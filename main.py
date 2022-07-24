@@ -1,7 +1,7 @@
 from pipeline.mapper import Buffer, Divide, ToChars, ToString
+from pipeline.base import Pipeline
 from pipeline.sink import Print
-from pipeline.source import RandomSource
-from pipeline.stream import Stream
+from pipeline.source import MappedSource, RandomSource
 
 source = RandomSource(nb_iterations=10)
 mapper = (
@@ -10,8 +10,9 @@ mapper = (
     .with_next(ToChars())
     .with_next(Buffer(size=5))
 )
+mapped_source = MappedSource(source, mapper)
 sink = Print()
 
-stream = Stream(source, mapper, sink)
+pipeline = Pipeline(source, sink)
 
-stream.start()
+pipeline.run()
