@@ -2,7 +2,7 @@ import multiprocessing
 
 from pipeline.queue import GetBlocking, PutBlocking, Queue
 from pipeline.runnable import MultiProcess, Pipeline
-from pipeline.sink import Print, QueueSink
+from pipeline.sink import Printer, QueueSink
 from pipeline.source import QueueSource, RandomSource
 
 
@@ -17,7 +17,7 @@ def pipeline1(queue: Queue[float]):
 
 def pipeline2(queue: Queue[float]):
     source = QueueSource[float](queue, GetBlocking())
-    sink = Print()
+    sink = Printer()
 
     pipeline = Pipeline(source, sink)
 

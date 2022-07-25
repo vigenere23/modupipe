@@ -10,13 +10,13 @@ VALUE = 3.546
 
 
 class FakeSource(Source[float]):
-    def get(self) -> Iterator[float]:
+    def fetch(self) -> Iterator[float]:
         yield VALUE
         yield VALUE
 
 
 class FailingSource(Source[None]):
-    def get(self) -> Iterator[None]:
+    def fetch(self) -> Iterator[None]:
         raise Exception()
 
 

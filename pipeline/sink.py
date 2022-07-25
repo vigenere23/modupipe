@@ -26,7 +26,7 @@ class NullSink(Sink[Any]):
         pass
 
 
-class Print(Sink[Any]):
+class Printer(Sink[Any]):
     def receive(self, input: Any) -> None:
         print(input)
 

@@ -22,7 +22,7 @@ class Pipeline(Runnable, Generic[Data]):
         self.sink = sink
 
     def run(self):
-        for item in self.source.get():
+        for item in self.source.fetch():
             self.sink.receive(item)
 
 

@@ -16,6 +16,9 @@ class Mapper(ABC, Generic[Input, Output]):
     def with_next(self, next: Mapper[Output, NextOutput]) -> Mapper[Input, NextOutput]:
         return Next(self, next)
 
+    def __add__(self, next: Mapper[Output, NextOutput]) -> Mapper[Input, NextOutput]:
+        return self.with_next(next)
+
 
 class Next(Mapper[Input, NextOutput], Generic[Input, Output, NextOutput]):
     def __init__(

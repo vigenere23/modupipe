@@ -1,9 +1,9 @@
 from pipeline.runnable import Pipeline
-from pipeline.sink import Print
+from pipeline.sink import Printer
 from pipeline.source import RandomSource
 
 source = RandomSource()
-sink = Print()
+sink = Printer()
 
 pipeline = Pipeline(source, sink)
 

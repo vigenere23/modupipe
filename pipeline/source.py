@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from random import random
 from typing import Generic, Iterator, TypeVar
@@ -12,8 +14,14 @@ MappedData = TypeVar("MappedData")
 
 class Source(ABC, Generic[Data]):
     @abstractmethod
-    def get(self) -> Iterator[Data]:
+    def fetch(self) -> Iterator[Data]:
         pass
+
+    def mapped_with(self, mapper: Mapper[Data, MappedData]) -> Source[MappedData]:
+        return MappedSource(self, mapper)
+
+    def __add__(self, mapper: Mapper[Data, MappedData]) -> Source[MappedData]:
+        return self.mapped_with(mapper)
 
 
 class MappedSource(Source[MappedData], Generic[Data, MappedData]):
@@ -21,8 +29,8 @@ class MappedSource(Source[MappedData], Generic[Data, MappedData]):
         self.source = source
         self.mapper = mapper
 
-    def get(self) -> Iterator[MappedData]:
-        return self.mapper.map(self.source.get())
+    def fetch(self) -> Iterator[MappedData]:
+        return self.mapper.map(self.source.fetch())
 
 
 class QueueSource(Source[Data]):
@@ -30,13 +38,13 @@ class QueueSource(Source[Data]):
         self.queue = queue
         self.strategy = strategy
 
-    def get(self) -> Iterator[Data]:
+    def fetch(self) -> Iterator[Data]:
         while True:
             yield self.strategy.get(self.queue)
 
 
 class RandomSource(Source[float]):
-    def get(self) -> Iterator[float]:
+    def fetch(self) -> Iterator[float]:
         while True:
             yield random()
 
@@ -46,8 +54,8 @@ class MaxIterations(Source[Data]):
         self.source = source
         self.nb_iterations = nb_iterations
 
-    def get(self) -> Iterator[Data]:
-        for i, item in enumerate(self.source.get()):
+    def fetch(self) -> Iterator[Data]:
+        for i, item in enumerate(self.source.fetch()):
             if i >= self.nb_iterations:
                 raise MaxIterationsReached()
 

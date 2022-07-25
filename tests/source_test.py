@@ -10,7 +10,7 @@ MAPPED_VALUE = 6.394
 
 
 class FakeSource(Source[float]):
-    def get(self) -> Iterator[float]:
+    def fetch(self) -> Iterator[float]:
         yield VALUE
         yield VALUE
 
@@ -24,7 +24,7 @@ class FakeMapper(Mapper[float, float]):
 class MaxIterationsTest(unittest.TestCase):
     def test_itStopsAfterMaxIterations(self):
         source = MaxIterations(FakeSource(), nb_iterations=1)
-        items = source.get()
+        items = source.fetch()
 
         next(items)
 
@@ -33,7 +33,7 @@ class MaxIterationsTest(unittest.TestCase):
 
     def test_givenMaxIterationsSameAsNumberOfSourceItems_itDoesNotStop(self):
         source = MaxIterations(FakeSource(), nb_iterations=2)
-        items = source.get()
+        items = source.fetch()
 
         next(items)
         next(items)
