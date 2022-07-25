@@ -1,6 +1,6 @@
-from pipeline.runnable import Pipeline
-from pipeline.sink import Printer
-from pipeline.source import RandomSource
+from modupipe.runnable import Pipeline
+from modupipe.sink import Printer
+from modupipe.source import RandomSource
 
 source = RandomSource()
 sink = Printer()

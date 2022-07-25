@@ -4,8 +4,8 @@ from multiprocessing import Process
 from threading import Thread
 from typing import Generic, List, TypeVar
 
-from pipeline.sink import Sink
-from pipeline.source import Source
+from modupipe.sink import Sink
+from modupipe.source import Source
 
 Data = TypeVar("Data")
 

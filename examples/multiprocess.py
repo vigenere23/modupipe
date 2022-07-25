@@ -1,9 +1,9 @@
 import multiprocessing
 
-from pipeline.queue import GetBlocking, PutBlocking, Queue
-from pipeline.runnable import MultiProcess, Pipeline
-from pipeline.sink import Printer, QueueSink
-from pipeline.source import QueueSource, RandomSource
+from modupipe.queue import GetBlocking, PutBlocking, Queue
+from modupipe.runnable import MultiProcess, Pipeline
+from modupipe.sink import Printer, QueueSink
+from modupipe.source import QueueSource, RandomSource
 
 
 def pipeline1(queue: Queue[float]):

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Generic, List, TypeVar
 
-from pipeline.queue import Queue, QueuePutStrategy
+from modupipe.queue import Queue, QueuePutStrategy
 
 Input = TypeVar("Input")
 

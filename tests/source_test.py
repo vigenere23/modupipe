@@ -1,9 +1,9 @@
 import unittest
 from typing import Iterator
 
-from pipeline.exceptions import MaxIterationsReached
-from pipeline.mapper import Mapper
-from pipeline.source import MaxIterations, Source
+from modupipe.exceptions import MaxIterationsReached
+from modupipe.mapper import Mapper
+from modupipe.source import MaxIterations, Source
 
 VALUE = 3.546
 MAPPED_VALUE = 6.394

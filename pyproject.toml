@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "pipeline"
+name = "modupipe"
 version = "0.1.0"
 description = ""
 authors = ["vigenere23 <lolgab1@hotmail.com>"]

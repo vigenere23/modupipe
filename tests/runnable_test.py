@@ -2,9 +2,9 @@ import unittest
 from typing import Iterator
 from unittest.mock import MagicMock, call
 
-from pipeline.runnable import Pipeline
-from pipeline.sink import NullSink
-from pipeline.source import Source
+from modupipe.runnable import Pipeline
+from modupipe.sink import NullSink
+from modupipe.source import Source
 
 VALUE = 3.546
 

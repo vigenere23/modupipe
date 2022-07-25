@@ -4,9 +4,9 @@ from abc import ABC, abstractmethod
 from random import random
 from typing import Generic, Iterator, TypeVar
 
-from pipeline.exceptions import MaxIterationsReached
-from pipeline.mapper import Mapper
-from pipeline.queue import Queue, QueueGetStrategy
+from modupipe.exceptions import MaxIterationsReached
+from modupipe.mapper import Mapper
+from modupipe.queue import Queue, QueueGetStrategy
 
 Data = TypeVar("Data")
 MappedData = TypeVar("MappedData")
