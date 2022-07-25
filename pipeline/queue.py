@@ -1,13 +1,15 @@
-from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, Union
 import multiprocessing
 import queue
+from abc import ABC, abstractmethod
+from typing import Generic, TypeVar, Union
 
 T = TypeVar("T")
 
 
 class Queue(Generic[T]):
-    def __init__(self, queue: Union["queue.Queue[T]", "multiprocessing.Queue[T]"]) -> None:
+    def __init__(
+        self, queue: Union["queue.Queue[T]", "multiprocessing.Queue[T]"]
+    ) -> None:
         self.queue = queue
 
     def get(self, *args, **kwargs) -> T:
