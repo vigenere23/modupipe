@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from random import random
 from typing import Generic, Iterator, TypeVar
 
+from pipeline.exceptions import MaxIterationsReached
 from pipeline.mapper import Mapper
 from pipeline.queue import Queue, QueueGetStrategy
 
@@ -48,6 +49,6 @@ class MaxIterations(Source[Data]):
     def get(self) -> Iterator[Data]:
         for i, item in enumerate(self.source.get()):
             if i >= self.nb_iterations:
-                raise StopIteration("Max number of iterations reached.")
+                raise MaxIterationsReached()
 
             yield item

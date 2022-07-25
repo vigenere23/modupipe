@@ -6,13 +6,18 @@ from pipeline.runnable import Pipeline
 from pipeline.sink import NullSink
 from pipeline.source import Source
 
-A_VALUE = 3.546
+VALUE = 3.546
 
 
 class FakeSource(Source[float]):
     def get(self) -> Iterator[float]:
-        yield A_VALUE
-        yield A_VALUE
+        yield VALUE
+        yield VALUE
+
+
+class FailingSource(Source[None]):
+    def get(self) -> Iterator[None]:
+        raise Exception()
 
 
 class PipelineTest(unittest.TestCase):
@@ -23,4 +28,23 @@ class PipelineTest(unittest.TestCase):
 
         pipeline.run()
 
-        sink.receive.assert_has_calls([call(A_VALUE), call(A_VALUE)])
+        sink.receive.assert_has_calls([call(VALUE), call(VALUE)])
+
+    def test_givingFailingSource_itRethrowsException(self):
+        sink = NullSink()
+        pipeline = Pipeline[float](source=FailingSource(), sink=sink)
+
+        with self.assertRaises(Exception):
+            pipeline.run()
+
+    def test_givingFailingSource_itDoesNotSendToSink(self):
+        sink = NullSink()
+        sink.receive = MagicMock()  # type: ignore
+        pipeline = Pipeline[float](source=FailingSource(), sink=sink)
+
+        try:
+            pipeline.run()
+        except Exception:
+            pass
+        finally:
+            sink.receive.assert_not_called()
