@@ -1,9 +1,9 @@
+import unittest
 from typing import Iterator
+
+from pipeline.runnable import Pipeline
 from pipeline.sink import NullSink
 from pipeline.source import Source
-from pipeline.base import Pipeline
-import unittest
-
 
 A_VALUE = 3.546
 
@@ -16,7 +16,4 @@ class FakeSource(Source[float]):
 
 class PipelineTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.steam = Pipeline(
-            source=FakeSource(),
-            sink=NullSink()
-        )
+        self.pipeline = Pipeline[float](source=FakeSource(), sink=NullSink())

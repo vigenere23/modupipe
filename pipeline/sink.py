@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Any, Generic, List, TypeVar
 
+from pipeline.queue import Queue, QueuePutStrategy
+
 Input = TypeVar("Input")
 
 
@@ -10,7 +12,7 @@ class Sink(ABC, Generic[Input]):
         pass
 
 
-class SinkList(Sink[Input], Generic[Input]):
+class SinkList(Sink[Input]):
     def __init__(self, sinks: List[Sink[Input]]) -> None:
         self.sinks = sinks
 
@@ -19,11 +21,20 @@ class SinkList(Sink[Input], Generic[Input]):
             sink.receive(input)
 
 
-class NullSink(Sink[float]):
-    def receive(self, _: float) -> None:
+class NullSink(Sink[Any]):
+    def receive(self, _: Any) -> None:
         pass
 
 
 class Print(Sink[Any]):
-    def receive(self, input: Input) -> None:
+    def receive(self, input: Any) -> None:
         print(input)
+
+
+class QueueSink(Sink[Input]):
+    def __init__(self, queue: Queue[Input], strategy: QueuePutStrategy) -> None:
+        self.queue = queue
+        self.strategy = strategy
+
+    def receive(self, input: Input) -> None:
+        self.strategy.put(self.queue, input)

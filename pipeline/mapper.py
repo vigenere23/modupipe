@@ -3,8 +3,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Generic, Iterator, List, TypeVar
 
-from pipeline.types import Number
-
 Input = TypeVar("Input")
 Output = TypeVar("Output")
 NextOutput = TypeVar("NextOutput")
@@ -31,25 +29,10 @@ class Next(Mapper[Input, NextOutput], Generic[Input, Output, NextOutput]):
         return self.next.map(output)
 
 
-class Divide(Mapper[Number, float], Generic[Number]):
-    def __init__(self, divider: float) -> None:
-        self.divider = divider
-
-    def map(self, input: Iterator[Number]) -> Iterator[float]:
-        for item in input:
-            yield item / self.divider
-
-
 class ToString(Mapper[Input, str], Generic[Input]):
     def map(self, input: Iterator[Input]) -> Iterator[str]:
         for item in input:
             yield str(item)
-
-
-class ToChars(Mapper[str, List[str]]):
-    def map(self, input: Iterator[str]) -> Iterator[List[str]]:
-        for item in input:
-            yield list(item)
 
 
 class Buffer(Mapper[Input, List[Input]], Generic[Input]):

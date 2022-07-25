@@ -3,6 +3,7 @@ from random import random
 from typing import Generic, Iterator, TypeVar
 
 from pipeline.mapper import Mapper
+from pipeline.queue import Queue, QueueGetStrategy
 
 Data = TypeVar("Data")
 MappedData = TypeVar("MappedData")
@@ -23,10 +24,30 @@ class MappedSource(Source[MappedData], Generic[Data, MappedData]):
         return self.mapper.map(self.source.get())
 
 
+class QueueSource(Source[Data]):
+    def __init__(self, queue: Queue[Data], strategy: QueueGetStrategy[Data]) -> None:
+        self.queue = queue
+        self.strategy = strategy
+
+    def get(self) -> Iterator[Data]:
+        while True:
+            yield self.strategy.get(self.queue)
+
+
 class RandomSource(Source[float]):
-    def __init__(self, nb_iterations: int) -> None:
+    def get(self) -> Iterator[float]:
+        while True:
+            yield random()
+
+
+class MaxIterations(Source[Data]):
+    def __init__(self, source: Source[Data], nb_iterations: int) -> None:
+        self.source = source
         self.nb_iterations = nb_iterations
 
-    def get(self) -> Iterator[float]:
-        for _ in range(self.nb_iterations):
-            yield random()
+    def get(self) -> Iterator[Data]:
+        for i, item in enumerate(self.source.get()):
+            if i >= self.nb_iterations:
+                raise StopIteration("Max number of iterations reached.")
+
+            yield item
