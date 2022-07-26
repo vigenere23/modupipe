@@ -1,6 +1,9 @@
 import unittest
+from typing import Iterable
 
-from modupipe.mapper import Buffer, Next, ToString
+from mockito import mock, when
+
+from modupipe.mapper import Buffer, Mapper, Next, ToString
 
 VALUE_1 = 243.2345
 VALUE_2 = 39.42
@@ -8,19 +11,28 @@ VALUE_2 = 39.42
 
 class NextTest(unittest.TestCase):
     def test_itChainsMappersTogether(self):
-        mapper1 = ToString()
-        mapper2 = Buffer(size=2)
+        source_items = iter([VALUE_1, VALUE_2])
+        first_mapped_items = iter([str(VALUE_1), str(VALUE_2)])
+        second_mapped_items = iter([[VALUE_1], [VALUE_2]])
+        mapper1 = self._givenMapperWith(source_items, first_mapped_items)
+        mapper2 = self._givenMapperWith(first_mapped_items, second_mapped_items)
         chained_mappers = Next(mapper1, mapper2)
-        items = iter([VALUE_1, VALUE_2])
 
-        mapped_items = next(chained_mappers.map(items))
+        mapped_items = chained_mappers.map(source_items)
 
-        expected_items = [str(VALUE_1), str(VALUE_2)]
-        self.assertEqual(mapped_items, expected_items)
+        self.assertEqual(mapped_items, second_mapped_items)
+
+    def _givenMapperWith(
+        self, receiving_value: Iterable[float], return_value: Iterable[float]
+    ):
+        mapper = mock(Mapper)
+        when(mapper).map(receiving_value).thenReturn(return_value)
+
+        return mapper
 
 
 class ToStringTest(unittest.TestCase):
-    def test_itTransformsToSting(self):
+    def test_itTransformsToString(self):
         mapper = ToString()
         items = iter([VALUE_1, VALUE_2])
 
