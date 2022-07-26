@@ -34,13 +34,16 @@ class Retry(Runnable):
     def run(self):
         retries = 0
 
-        while retries < self.max_retries:
+        while True:
             try:
                 self.runnable.run()
-            except Exception:
-                print("An exception occured while running pipeline :")
-                print(traceback.format_exc())
-                retries += 1
+            except Exception as e:
+                if retries >= self.max_retries:
+                    raise e
+                else:
+                    print("An exception occured while running pipeline :")
+                    print(traceback.format_exc())
+                    retries += 1
 
 
 class MultiThread(Runnable):
