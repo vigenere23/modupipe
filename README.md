@@ -1,8 +1,6 @@
 [![Build](https://github.com/vigenere23/modupipe/actions/workflows/build.yml/badge.svg)](https://github.com/vigenere23/modupipe/actions/workflows/build.yml)
 
-# ModuPipe : Modular pipelines made easy
-
-ModuPipe is a ETL-like pipeline library that gives you an extensible and modular pipeline architecture ready to use.
+# ModuPipe : A modular and extensible ETL-like pipeline builder
 
 ## Benefits
 
@@ -14,11 +12,13 @@ ModuPipe is a ETL-like pipeline library that gives you an extensible and modular
 
 Extract-Transform-Load (ETL) pipelines are a classic form of data-processing pipelines used in the industry. It consists of 3 main elements:
 
-1. A **source**, which returns data in a stream-like structure (`Iterator` in Python)
-2. A **mapper** (optional), which transforms (parse, converts, filters, etc.) the data obtained from the source(s)
-3. A **sink**, which receives the maybe-transformed data (sinks can be multiple)
+1. A **`Source`**, which returns data in a stream-like structure (`Iterator` in Python) using a pull strategy.
+2. A (list of) **`Mapper`** (optional), which transforms (parse, converts, filters, etc.) the data obtained from the source(s). Mappers can be chained together, and chained to a source in order to form a new source.
+3. A **`Sink`**, which receives the maybe-transformed data using a push strategy. Sinks can be multiple (with `SinkList`).
 
 Therefore, those 3 processes are offered as interfaces, easily chainable and interchangeable at any time.
+
+An interface `Runnable` is also offered in order to interface the concept of "running a pipeline". This enables a powerfull composition pattern for wrapping the execution behaviour of runnables.
 
 ## Examples
 
