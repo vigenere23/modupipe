@@ -3,6 +3,11 @@ name = "modupipe"
 version = "0.1.0"
 description = "A modular and extensible ETL-like pipeline builder"
 authors = ["vigenere23 <lolgab1@hotmail.com>"]
+keywords = ["pipeline", "etl", "pipe"]
+license = "MIT"
+homepage = "https://github.com/vigenere23/modupipe"
+repository = "https://github.com/vigenere23/modupipe"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
