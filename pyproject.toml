@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "modupipe"
-version = "0.1.0"
+version = "0.2.0"
 description = "A modular and extensible ETL-like pipeline builder"
 authors = ["vigenere23 <lolgab1@hotmail.com>"]
 keywords = ["pipeline", "etl", "pipe"]
