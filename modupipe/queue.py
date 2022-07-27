@@ -21,7 +21,7 @@ class Queue(Generic[T]):
 
 class QueuePutStrategy(ABC, Generic[T]):
     @abstractmethod
-    def put(self, queue: Queue[T], input: T):
+    def put(self, queue: Queue[T], item: T):
         pass
 
 
@@ -29,13 +29,13 @@ class PutBlocking(QueuePutStrategy[T]):
     def __init__(self, timeout: int = None) -> None:
         self.timeout = timeout
 
-    def put(self, queue: Queue[T], input: T):
-        queue.put(input, block=True, timeout=self.timeout)
+    def put(self, queue: Queue[T], item: T):
+        queue.put(item, block=True, timeout=self.timeout)
 
 
 class PutNonBlocking(QueuePutStrategy[T]):
-    def put(self, queue: Queue[T], input: T):
-        queue.put(input, block=False)
+    def put(self, queue: Queue[T], item: T):
+        queue.put(item, block=False)
 
 
 class QueueGetStrategy(ABC, Generic[T]):

@@ -1,4 +1,5 @@
 from typing import Any, Iterator
+
 from modupipe.mapper import Mapper
 from modupipe.runnable import Pipeline
 from modupipe.sink import Sink
@@ -18,8 +19,8 @@ class Divider(Mapper[int, float]):
     def __init__(self, divider: int) -> None:
         self.divider = divider
 
-    def map(self, input: Iterator[int]) -> Iterator[float]:
-        for item in input:
+    def map(self, items: Iterator[int]) -> Iterator[float]:
+        for item in items:
             yield item / self.divider
 
 
@@ -27,8 +28,8 @@ class CustomPrinter(Sink[Any]):
     def __init__(self, prefix: str) -> None:
         self.prefix = prefix
 
-    def receive(self, input: Any) -> None:
-        print(f"{self.prefix}{input}")
+    def receive(self, item: Any) -> None:
+        print(f"{self.prefix}{item}")
 
 
 source = IncrementalSource() + Divider(2)

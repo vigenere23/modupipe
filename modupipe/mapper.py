@@ -10,7 +10,7 @@ NextOutput = TypeVar("NextOutput")
 
 class Mapper(ABC, Generic[Input, Output]):
     @abstractmethod
-    def map(self, input: Iterator[Input]) -> Iterator[Output]:
+    def map(self, items: Iterator[Input]) -> Iterator[Output]:
         pass
 
     def with_next(self, next: Mapper[Output, NextOutput]) -> Mapper[Input, NextOutput]:
@@ -33,8 +33,8 @@ class Next(Mapper[Input, NextOutput], Generic[Input, Output, NextOutput]):
 
 
 class ToString(Mapper[Input, str], Generic[Input]):
-    def map(self, input: Iterator[Input]) -> Iterator[str]:
-        for item in input:
+    def map(self, items: Iterator[Input]) -> Iterator[str]:
+        for item in items:
             yield str(item)
 
 
@@ -43,8 +43,8 @@ class Buffer(Mapper[Input, List[Input]], Generic[Input]):
         self.size = size
         self.buffer: List[Input] = []
 
-    def map(self, input: Iterator[Input]) -> Iterator[List[Input]]:
-        for item in input:
+    def map(self, items: Iterator[Input]) -> Iterator[List[Input]]:
+        for item in items:
             self.buffer.append(item)
 
             if len(self.buffer) >= self.size:

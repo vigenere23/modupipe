@@ -8,7 +8,7 @@ Input = TypeVar("Input")
 
 class Sink(ABC, Generic[Input]):
     @abstractmethod
-    def receive(self, input: Input) -> None:
+    def receive(self, item: Input) -> None:
         pass
 
 
@@ -16,9 +16,9 @@ class SinkList(Sink[Input]):
     def __init__(self, sinks: List[Sink[Input]]) -> None:
         self.sinks = sinks
 
-    def receive(self, input: Input) -> None:
+    def receive(self, item: Input) -> None:
         for sink in self.sinks:
-            sink.receive(input)
+            sink.receive(item)
 
 
 class NullSink(Sink[Any]):
@@ -27,8 +27,8 @@ class NullSink(Sink[Any]):
 
 
 class Printer(Sink[Any]):
-    def receive(self, input: Any) -> None:
-        print(input)
+    def receive(self, item: Any) -> None:
+        print(item)
 
 
 class QueueSink(Sink[Input]):
@@ -36,5 +36,5 @@ class QueueSink(Sink[Input]):
         self.queue = queue
         self.strategy = strategy
 
-    def receive(self, input: Input) -> None:
-        self.strategy.put(self.queue, input)
+    def receive(self, item: Input) -> None:
+        self.strategy.put(self.queue, item)

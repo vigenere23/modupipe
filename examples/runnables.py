@@ -1,5 +1,6 @@
 from random import random
 from typing import Iterator
+
 from modupipe.runnable import Pipeline, Retry
 from modupipe.sink import Printer
 from modupipe.source import Source

@@ -21,28 +21,26 @@ class FakeSource(Source[float]):
 
 class MaxIterationsTest(unittest.TestCase):
     def test_itStopsAfterMaxIterations(self):
-        source = MaxIterations(FakeSource(), nb_iterations=1)
+        fail_after = 2
+        source = MaxIterations(
+            self._givenSourceWith(n_items=fail_after + 1), nb_iterations=fail_after
+        )
         items = source.fetch()
 
-        next(items)
+        for _ in range(fail_after):
+            next(items)
 
         with self.assertRaises(MaxIterationsReached):
             next(items)
 
-    def test_givenMaxIterationsSameAsNumberOfSourceItems_itDoesNotStop(self):
-        source = MaxIterations(FakeSource(), nb_iterations=2)
-        items = source.fetch()
+    def _givenSourceWith(self, n_items: int):
+        source = mock(Source)
+        when(source).fetch().thenReturn(iter([VALUE_1] * n_items))
 
-        next(items)
-        next(items)
+        return source
 
 
 class MappedSourceTest(unittest.TestCase):
-    class Divider(Mapper[float, float]):
-        def map(self, input: Iterator[float]) -> Iterator[float]:
-            for item in input:
-                yield item / 2
-
     def test_itMapsSourceValues(self):
         source_items = iter([VALUE_1, VALUE_2])
         mapped_items = [VALUE_1 / 2, VALUE_2 / 2]
