@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Generic, List, TypeVar
 
+from modupipe.base import Condition
 from modupipe.queue import Queue, QueuePutStrategy
 
 Input = TypeVar("Input")
@@ -38,3 +39,13 @@ class QueueSink(Sink[Input]):
 
     def receive(self, item: Input) -> None:
         self.strategy.put(self.queue, item)
+
+
+class ConditionalSink(Sink[Input]):
+    def __init__(self, sink: Sink[Input], condition: Condition) -> None:
+        self.sink = sink
+        self.condition = condition
+
+    def receive(self, item: Input) -> None:
+        if self.condition.check(item):
+            self.sink.receive(item)

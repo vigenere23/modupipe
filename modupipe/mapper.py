@@ -3,6 +3,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Generic, Iterator, List, TypeVar
 
+from modupipe.base import Condition
+
 Input = TypeVar("Input")
 Output = TypeVar("Output")
 NextOutput = TypeVar("NextOutput")
@@ -30,6 +32,16 @@ class Next(Mapper[Input, NextOutput], Generic[Input, Output, NextOutput]):
     def map(self, input: Iterator[Input]) -> Iterator[NextOutput]:
         output = self.mapper.map(input)
         return self.next.map(output)
+
+
+class Filter(Mapper[Input, Input], Generic[Input]):
+    def __init__(self, condition: Condition[Input]) -> None:
+        self.condition = condition
+
+    def map(self, items: Iterator[Input]) -> Iterator[Input]:
+        for item in items:
+            if self.condition.check(item):
+                yield item
 
 
 class ToString(Mapper[Input, str], Generic[Input]):
