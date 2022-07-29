@@ -43,10 +43,15 @@ jobs:
   Release:
     runs-on: ubuntu-latest
     needs: Build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master' && !contains(github.event.head_commit.message, 'chore(release):')
+
+    # TODO add
+    # if: github.event_name == 'push' && github.ref == 'refs/heads/master' && !contains(github.event.head_commit.message, 'chore(release):')
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.ACCESS_TOKEN }}
 
       - uses: actions/setup-python@v4
         with:
@@ -64,7 +69,10 @@ jobs:
           restore-keys: |
             poetry-${{ hashFiles('**/poetry.lock') }}
 
-  #     - name: Semantic Release
-  #       run: |
-  #         pip install python-semantic-release
-  #         semantic-release publish
+      - name: Semantic Release
+        uses: relekang/python-semantic-release@master
+        with:
+          github_token: ${{ secrets.ACCESS_TOKEN }}
+          repository_username: __token__
+          repository_password: ${{ secrets.PYPI_TOKEN }}
+          additional_options: --noop  # TODO remove
