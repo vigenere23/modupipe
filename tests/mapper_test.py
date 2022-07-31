@@ -3,7 +3,8 @@ from typing import Iterable
 
 from mockito import mock, when
 
-from modupipe.mapper import Buffer, Mapper, Next, ToString
+from modupipe.base import Condition
+from modupipe.mapper import Buffer, Filter, Mapper, Next, ToString
 
 VALUE_1 = 243.2345
 VALUE_2 = 39.42
@@ -51,3 +52,28 @@ class BufferTest(unittest.TestCase):
 
         expected_items = [VALUE_1, VALUE_2]
         self.assertEqual(mapped_items, expected_items)
+
+
+class FilterTest(unittest.TestCase):
+    def test_itCanFilterIn(self):
+        value = VALUE_1
+        true_condition = self._givenConditionReturning(True)
+        mapper = Filter(true_condition)
+
+        filtered_item = next(mapper.map(iter([value])))
+
+        self.assertEqual(filtered_item, value)
+
+    def test_itCanFilterOut(self):
+        value = VALUE_1
+        false_condition = self._givenConditionReturning(False)
+        mapper = Filter(false_condition)
+
+        with self.assertRaises(StopIteration):
+            next(mapper.map(iter([value])))
+
+    def _givenConditionReturning(self, value: bool):
+        condition = mock(Condition)
+        when(condition).check(...).thenReturn(value)
+
+        return condition
