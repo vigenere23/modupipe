@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from random import random
-from typing import Generic, Iterator, TypeVar
+from typing import Generic, Iterator, List, Tuple, TypeVar
 
 from modupipe.exceptions import MaxIterationsReached
 from modupipe.mapper import Mapper
@@ -31,6 +31,16 @@ class MappedSource(Source[MappedData], Generic[Data, MappedData]):
 
     def fetch(self) -> Iterator[MappedData]:
         return self.mapper.map(self.source.fetch())
+
+
+class SourceList(Source[Tuple[Data, ...]], Generic[Data]):
+    def __init__(self, sources: List[Source[Data]]) -> None:
+        self.sources = sources
+
+    def fetch(self) -> Iterator[Tuple[Data, ...]]:
+        source_iters = (source.fetch() for source in self.sources)
+        for items in zip(*source_iters):
+            yield items
 
 
 class QueueSource(Source[Data]):
