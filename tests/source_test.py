@@ -1,22 +1,35 @@
 import multiprocessing
 import unittest
-from typing import Iterator
+from typing import Iterator, List
 
 from mockito import mock, when
 
 from modupipe.exceptions import MaxIterationsReached
 from modupipe.mapper import Mapper
 from modupipe.queue import GetBlocking, Queue
-from modupipe.source import MappedSource, MaxIterations, QueueSource, Source
+from modupipe.source import MappedSource, MaxIterations, QueueSource, Source, SourceList
 
 VALUE_1 = 3.546
 VALUE_2 = 2349.234
 
 
-class FakeSource(Source[float]):
-    def fetch(self) -> Iterator[float]:
-        yield VALUE_1
-        yield VALUE_2
+class SourceListTest(unittest.TestCase):
+    def test_itIteratesThroughEachSources(self):
+        items1 = [1, 2, 3]
+        items2 = [4, 5, 6]
+        source1 = self._givenSourceReturning(items1)
+        source2 = self._givenSourceReturning(items2)
+        source = SourceList([source1, source2])
+
+        items = list(source.fetch())
+
+        self.assertEqual(items, [(1, 4), (2, 5), (3, 6)])
+
+    def _givenSourceReturning(self, items: List[float]):
+        source = mock(Source)
+        when(source).fetch().thenReturn(iter(items))
+
+        return source
 
 
 class MaxIterationsTest(unittest.TestCase):
