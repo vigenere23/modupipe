@@ -26,6 +26,16 @@ class Pipeline(Runnable, Generic[Data]):
             self.sink.receive(item)
 
 
+class NamedRunnable(Runnable, Generic[Data]):
+    def __init__(self, name: str, runnable: Runnable) -> None:
+        self.name = name
+        self.runnable = runnable
+
+    def run(self):
+        print(f"Running {self.name}")
+        self.runnable.run()
+
+
 class Retry(Runnable):
     def __init__(self, runnable: Runnable, nb_times: int) -> None:
         self.runnable = runnable
