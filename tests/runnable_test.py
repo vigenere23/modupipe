@@ -3,7 +3,7 @@ from typing import Iterator
 
 from mockito import mock, verify, when
 
-from modupipe.runnable import Pipeline, Retry
+from modupipe.runnable import NamedRunnable, Pipeline, Retry, Runnable
 from modupipe.sink import NullSink, Sink
 from modupipe.source import Source
 
@@ -68,3 +68,16 @@ class RetryTest(unittest.TestCase):
         when(source).fetch().thenRaise(Exception)
 
         return source
+
+
+class NamedRunnableTest(unittest.TestCase):
+    def test_itDelegatesToSubrunnable(self):
+        runnable = self._givenRunnable()
+        named_runnable = NamedRunnable("test", runnable=runnable)
+
+        named_runnable.run()
+
+        verify(runnable).run()
+
+    def _givenRunnable(self):
+        return mock(Runnable, strict=False)
