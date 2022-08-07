@@ -4,8 +4,7 @@ from multiprocessing import Process
 from threading import Thread
 from typing import Generic, List, TypeVar
 
-from modupipe.sink import Sink
-from modupipe.source import Source
+from modupipe.extractor import Extractor
 
 Data = TypeVar("Data")
 
@@ -16,14 +15,34 @@ class Runnable(ABC):
         pass
 
 
-class Pipeline(Runnable, Generic[Data]):
-    def __init__(self, source: Source[Data], sink: Sink[Data]) -> None:
-        self.source = source
-        self.sink = sink
+class StepPipeline(Runnable, Generic[Data]):
+    def __init__(self, extractor: Extractor[Data]) -> None:
+        self.iterator = extractor.extract()
 
     def run(self):
-        for item in self.source.fetch():
-            self.sink.receive(item)
+        try:
+            next(self.iterator)
+        except StopIteration:
+            pass
+
+
+class FullPipeline(Runnable, Generic[Data]):
+    def __init__(self, extractor: Extractor[Data]) -> None:
+        self.extractor = extractor
+
+    def run(self):
+        for _ in self.extractor.extract():
+            pass
+
+
+class Repeat(Runnable, Generic[Data]):
+    def __init__(self, runnable: Runnable, nb_times: int) -> None:
+        self.runnable = runnable
+        self.nb_repeats = nb_times
+
+    def run(self):
+        for _ in range(self.nb_repeats):
+            self.runnable.run()
 
 
 class NamedRunnable(Runnable, Generic[Data]):

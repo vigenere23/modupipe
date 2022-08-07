@@ -1,11 +1,9 @@
-from modupipe.mapper import Buffer, ToString
-from modupipe.runnable import Pipeline
-from modupipe.sink import Printer
-from modupipe.source import RandomSource
+from modupipe.extractor import Random
+from modupipe.mapper import Buffer, Print, ToString
+from modupipe.runnable import FullPipeline
 
-source = RandomSource() + ToString[float]() + Buffer[str](size=5)
-sink = Printer()
+extractor = Random() + ToString() + Buffer(size=5) + Print()
 
-pipeline = Pipeline(source, sink)
+pipeline = FullPipeline(extractor)
 
 pipeline.run()

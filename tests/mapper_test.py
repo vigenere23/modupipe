@@ -4,20 +4,20 @@ from typing import Iterable
 from mockito import mock, when
 
 from modupipe.base import Condition
-from modupipe.mapper import Buffer, Filter, Mapper, Next, ToString
+from modupipe.mapper import Buffer, ChainedMapper, Filter, Mapper, ToString
 
 VALUE_1 = 243.2345
 VALUE_2 = 39.42
 
 
-class NextTest(unittest.TestCase):
+class ChainedMapperTest(unittest.TestCase):
     def test_itChainsMappersTogether(self):
         source_items = iter([VALUE_1, VALUE_2])
         first_mapped_items = iter([str(VALUE_1), str(VALUE_2)])
         second_mapped_items = iter([[VALUE_1], [VALUE_2]])
         mapper1 = self._givenMapperWith(source_items, first_mapped_items)
         mapper2 = self._givenMapperWith(first_mapped_items, second_mapped_items)
-        chained_mappers = Next(mapper1, mapper2)
+        chained_mappers = ChainedMapper(mapper1, mapper2)
 
         mapped_items = chained_mappers.map(source_items)
 

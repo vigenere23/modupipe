@@ -1,25 +1,23 @@
 import multiprocessing
 
+from modupipe.extractor import GetFromQueue, Random
+from modupipe.mapper import Print, PutToQueue
 from modupipe.queue import GetBlocking, PutBlocking, Queue
-from modupipe.runnable import MultiProcess, Pipeline
-from modupipe.sink import Printer, QueueSink
-from modupipe.source import QueueSource, RandomSource
+from modupipe.runnable import FullPipeline, MultiProcess
 
 
 def pipeline1(queue: Queue[float]):
-    source = RandomSource()
-    sink = QueueSink(queue, strategy=PutBlocking())
+    extractor = Random() + PutToQueue(queue, strategy=PutBlocking())
 
-    pipeline = Pipeline(source, sink)
+    pipeline = FullPipeline(extractor)
 
     return pipeline
 
 
 def pipeline2(queue: Queue[float]):
-    source = QueueSource[float](queue, GetBlocking())
-    sink = Printer()
+    extractor = GetFromQueue[float](queue, GetBlocking()) + Print()
 
-    pipeline = Pipeline(source, sink)
+    pipeline = FullPipeline(extractor)
 
     return pipeline
 

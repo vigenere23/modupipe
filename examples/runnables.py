@@ -1,13 +1,13 @@
 from random import random
 from typing import Iterator
 
-from modupipe.runnable import Pipeline, Retry
-from modupipe.sink import Printer
-from modupipe.source import Source
+from modupipe.extractor import Extractor
+from modupipe.mapper import Print
+from modupipe.runnable import FullPipeline, Retry
 
 
-class FailingSource(Source[float]):
-    def fetch(self) -> Iterator[float]:
+class FailingSource(Extractor[float]):
+    def extract(self) -> Iterator[float]:
         while True:
             value = random()
 
@@ -17,9 +17,8 @@ class FailingSource(Source[float]):
                 raise Exception("Did not work.")
 
 
-source = FailingSource()
-sink = Printer()
+extractor = FailingSource() + Print()
 
-pipeline = Retry(Pipeline(source, sink), nb_times=5)
+pipeline = Retry(FullPipeline(extractor), nb_times=5)
 
 pipeline.run()
