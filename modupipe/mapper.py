@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Generic, Iterator, List, Tuple, TypeVar
+from typing import Any, Generic, Iterator, List, TypeVar
 
 from modupipe.base import Condition
 from modupipe.loader import Loader
@@ -36,16 +36,6 @@ class ChainedMapper(Mapper[Input, NextOutput], Generic[Input, Output, NextOutput
         return self.next.map(output)
 
 
-class Repeat(IdentityMapper[Input]):
-    def __init__(self, nb_repeats: int) -> None:
-        self.nb_repeats = nb_repeats
-
-    def map(self, items: Iterator[Input]) -> Iterator[Input]:
-        for item in items:
-            for _ in range(self.nb_repeats):
-                yield item
-
-
 class Filter(IdentityMapper[Input]):
     def __init__(self, condition: Condition[Input]) -> None:
         self.condition = condition
@@ -54,17 +44,6 @@ class Filter(IdentityMapper[Input]):
         for item in items:
             if self.condition.check(item):
                 yield item
-
-
-class Aggregate(Mapper[Input, Tuple[Output, ...]]):
-    def __init__(self, mappers: List[Mapper[Input, Output]]) -> None:
-        self.mappers = mappers
-
-    def map(self, items: Iterator[Input]) -> Iterator[Tuple[Output, ...]]:
-        iterators = (mapper.map(items) for mapper in self.mappers)
-
-        for aggregate in zip(*iterators):
-            yield aggregate
 
 
 class ToString(Mapper[Input, str]):
@@ -115,7 +94,7 @@ class PushTo(IdentityMapper[Input]):
             yield item
 
 
-class PushAndMap(Mapper[Input, Output]):
+class PushToAndMap(Mapper[Input, Output]):
     def __init__(self, loader: Loader[Input, Output]) -> None:
         self.loader = loader
 
