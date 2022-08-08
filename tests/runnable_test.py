@@ -1,73 +1,112 @@
 import unittest
-from typing import Iterator
+from typing import Any, Iterator
 
 from mockito import mock, verify, when
 
-from modupipe.runnable import NamedRunnable, Pipeline, Retry, Runnable
-from modupipe.sink import NullSink, Sink
-from modupipe.source import Source
+from modupipe.extractor import Extractor
+from modupipe.loader import Loader
+from modupipe.mapper import PushTo
+from modupipe.runnable import FullPipeline, NamedRunnable, Retry, Runnable, StepPipeline
 
 VALUE_1 = 3.546
 VALUE_2 = 234.123
 
 
-class PipelineTest(unittest.TestCase):
-    def test_itPassesSourceItemsToSink(self):
-        sink = mock(Sink, strict=False)
-        source = self._givenSourceReturning(iter([VALUE_1, VALUE_2]))
-        pipeline = Pipeline[float](source=source, sink=sink)
+class FakeExtractor(Extractor[float]):
+    def __init__(self, items: Iterator[float]) -> None:
+        self.items = items
+
+    def extract(self) -> Iterator[float]:
+        return self.items
+
+
+class FailingExtractor(Extractor[Any]):
+    def extract(self) -> Iterator[Any]:
+        raise Exception
+        yield
+
+
+class FullPipelineTest(unittest.TestCase):
+    def test_whenRunning_itExtractsAllItems(self):
+        extractor = FakeExtractor(iter([VALUE_1, VALUE_2]))
+        loader = self._givenLoader()
+        pipeline = FullPipeline(extractor + PushTo(loader))
 
         pipeline.run()
 
-        verify(sink, inorder=True).receive(VALUE_1)
-        verify(sink, inorder=True).receive(VALUE_2)
+        verify(loader, inorder=True).load(VALUE_1)
+        verify(loader, inorder=True).load(VALUE_2)
 
-    def test_givingFailingSource_itRethrowsException(self):
-        sink = NullSink()
-        pipeline = Pipeline[float](source=self._givenFailingSource(), sink=sink)
+    def test_givingFailingExtractor_itRethrowsException(self):
+        pipeline = FullPipeline(FailingExtractor())
 
         with self.assertRaises(Exception):
             pipeline.run()
 
-    def test_givingFailingSource_itDoesNotSendToSink(self):
-        sink = mock(Sink)
-        pipeline = Pipeline[float](source=self._givenFailingSource(), sink=sink)
+    def test_givingFailingExtractor_itDoesNotSendToNextModules(self):
+        loader = self._givenLoader()
+        pipeline = FullPipeline(FailingExtractor() + PushTo(loader))
 
         try:
             pipeline.run()
         except Exception:
             pass
         finally:
-            verify(sink, times=0).receive(...)
+            verify(loader, times=0).load(...)
 
-    def _givenFailingSource(self):
-        source = mock(Source)
-        when(source).fetch().thenRaise(Exception)
-
-        return source
-
-    def _givenSourceReturning(self, items: Iterator[float]):
-        source = mock(Source)
-        when(source).fetch().thenReturn(items)
-
-        return source
+    def _givenLoader(self):
+        return mock(Loader, strict=False)
 
 
-class RetryTest(unittest.TestCase):
-    def test_itCatchesNFailures(self):
-        failing_source = self._givenFailingSource()
-        pipeline = Retry(Pipeline(failing_source, NullSink()), nb_times=2)
+class StepPipelineTest(unittest.TestCase):
+    def test_whenRunning_itExtractsOnlyOneItem(self):
+        extractor = FakeExtractor(iter([VALUE_1, VALUE_2]))
+        loader = self._givenLoader()
+        pipeline = StepPipeline(extractor + PushTo(loader))
+
+        pipeline.run()
+
+        verify(loader).load(VALUE_1)
+
+    def test_givingFailingExtractor_itRethrowsException(self):
+        pipeline = StepPipeline(FailingExtractor())
+
+        with self.assertRaises(Exception):
+            pipeline.run()
+
+    def test_givingFailingExtractor_itDoesNotSendToNextModules(self):
+        loader = self._givenLoader()
+        pipeline = StepPipeline(FailingExtractor() + PushTo(loader))
 
         try:
             pipeline.run()
         except Exception:
-            verify(failing_source, times=3).fetch()
+            pass
+        finally:
+            verify(loader, times=0).load(...)
+
+    def _givenLoader(self):
+        loader = mock(Loader)
+        when(loader).load(...).thenReturn(None)
+
+        return loader
+
+
+class RetryTest(unittest.TestCase):
+    def test_itCatchesNFailures(self):
+        failing_extractor = self._givenFailingSource()
+        pipeline = Retry(FullPipeline(failing_extractor), nb_times=2)
+
+        try:
+            pipeline.run()
+        except Exception:
+            verify(failing_extractor, times=3).extract()
 
     def _givenFailingSource(self):
-        source = mock(Source)
-        when(source).fetch().thenRaise(Exception)
+        extractor = mock(Extractor)
+        when(extractor).extract().thenRaise(Exception)
 
-        return source
+        return extractor
 
 
 class NamedRunnableTest(unittest.TestCase):
