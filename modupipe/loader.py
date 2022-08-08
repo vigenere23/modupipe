@@ -21,6 +21,7 @@ class Loader(ABC, Generic[Input, Output]):
 
 
 IdentityLoader = Loader[Input, Input]
+Sink = Loader[Input, Any]
 
 
 class ChainedLoader(Loader[Input, NextOutput], Generic[Input, Output, NextOutput]):
