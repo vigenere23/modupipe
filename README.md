@@ -12,9 +12,9 @@
 
 Extract-Transform-Load (ETL) pipelines are a classic form of data-processing pipelines used in the industry. It consists of 3 main elements:
 
-1. A **`Source`**, which returns data in a stream-like structure (`Iterator` in Python) using a pull strategy.
-2. A (list of) **`Mapper`** (optional), which transforms (parse, converts, filters, etc.) the data obtained from the source(s). Mappers can be chained together, and chained to a source in order to form a new source.
-3. A **`Sink`**, which receives the maybe-transformed data using a push strategy. Sinks can be multiple (with `SinkList`).
+1. An **`Extractor`**, which returns data in a stream-like structure (`Iterator` in Python) using a pull strategy.
+2. Some **`Mapper`** (optional), which transforms (parse, converts, filters, etc.) the data obtained from the source(s). Mappers can be chained together and chained to an extractor (with `+`) in order to form a new extractor.
+3. A **`Loader`**, which receives the maybe-transformed data using a push strategy. Loaders can be multiple (with `LoaderList`) or chained together (with `+`).
 
 Therefore, those 3 processes are offered as interfaces, easily chainable and interchangeable at any time.
 
@@ -26,25 +26,25 @@ Usage examples are present in the [examples](./examples) folder.
 
 ## Discussion
 
-### Optimizing pushing to multiple sinks
+### Optimizing pushing to multiple loaders
 
-If you have multiple sinks (using the `SinkList` class), but performance is a must, then you should use a multi-processing approach, and push to 1 queue per sink. Each queue will also become a direct source for each sink, all running in parallel. This is especially usefull when at least one of the sinks takes a long processing time.
+If you have multiple loaders (using the `LoaderList` class or many chained `PushTo` mappers), but performance is a must, then you should use a multi-processing approach (with `modupipe.runnable.MultiProcess`), and push to 1 queue per loader. Each queue will also become a direct extractor for each loader, all running in parallel. This is especially usefull when at least one of the loaders takes a long processing time.
 
-As an example, let's take a `Sink1` which is very slow, and a `Sink2` which is normally fast. You'll be going from :
+As an example, let's take a `Loader 1` which is very slow, and a `Loader 2` which is normally fast. You'll be going from :
 
 ```
-┌─── single pipeline ───┐
- Source ┬🠦 Sink1 (slow)
-        └🠦 Sink2 (late)
+┌────── single pipeline ──────┐        ┌──────────────── single pipeline ───────────────┐
+ Extractor ┬─⏵ Loader 1 (slow)    OR    Extractor ──⏵ Loader 1 (slow) ──⏵ Loader 2 (late)
+           └─⏵ Loader 2 (late)
 ```
 
 to :
 
 ```
-┌──── pipeline 1 ────┐             ┌──── pipeline 2 ─────┐
- Source ┬🠦 QueueSink1 ─🠦 Queue1 🠤─ QueueSource1 ─🠦 Sink1 (slow)
-        └🠦 QueueSink1 ─🠦 Queue2 🠤─ QueueSource2 ─🠦 Sink2 (not late)
-                                   └──── pipeline 3 ─────┘
+┌────── pipeline 1 ──────┐               ┌────────── pipeline 2 ─────────┐
+ Extractor ┬─⏵ PutToQueue ──⏵ Queue 1 ⏴── GetFromQueue ──⏵ Loader 1 (slow)
+           └─⏵ PutToQueue ──⏵ Queue 2 ⏴── GetFromQueue ──⏵ Loader 2 (not late)
+                                         └──────────── pipeline 3 ───────────┘
 ```
 
-This will of course not accelerate the `Sink1` processing time, but all the other sinks performances will be greatly improved by not waiting for each other.
+This will of course not accelerate the `Loader 1` processing time, but all the other loaders performances will be greatly improved by not waiting for each other.

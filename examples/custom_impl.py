@@ -1,13 +1,15 @@
-from typing import Any, Iterator
+from typing import Iterator, TypeVar
 
-from modupipe.mapper import Mapper
-from modupipe.runnable import Pipeline
-from modupipe.sink import Sink
-from modupipe.source import Source
+from modupipe.extractor import Extractor
+from modupipe.loader import IdentityLoader
+from modupipe.mapper import Mapper, PushTo
+from modupipe.runnable import FullPipeline
+
+T = TypeVar("T")
 
 
-class IncrementalSource(Source[int]):
-    def fetch(self) -> Iterator[int]:
+class Incremental(Extractor[int]):
+    def extract(self) -> Iterator[int]:
         i = 0
 
         while True:
@@ -15,7 +17,7 @@ class IncrementalSource(Source[int]):
             i += 1
 
 
-class Divider(Mapper[int, float]):
+class DivideBy(Mapper[int, float]):
     def __init__(self, divider: int) -> None:
         self.divider = divider
 
@@ -24,17 +26,17 @@ class Divider(Mapper[int, float]):
             yield item / self.divider
 
 
-class CustomPrinter(Sink[Any]):
+class CustomPrinter(IdentityLoader[T]):
     def __init__(self, prefix: str) -> None:
         self.prefix = prefix
 
-    def receive(self, item: Any) -> None:
+    def load(self, item: T) -> T:
         print(f"{self.prefix}{item}")
+        return item
 
 
-source = IncrementalSource() + Divider(2)
-sink = CustomPrinter("Value is : ")
+extractor = Incremental() + DivideBy(2) + PushTo(CustomPrinter(prefix="Value is : "))
 
-pipeline = Pipeline(source, sink)
+pipeline = FullPipeline(extractor)
 
 pipeline.run()

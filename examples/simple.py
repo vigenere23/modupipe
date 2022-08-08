@@ -1,10 +1,9 @@
-from modupipe.runnable import Pipeline
-from modupipe.sink import Printer
-from modupipe.source import RandomSource
+from modupipe.extractor import Random
+from modupipe.mapper import Print
+from modupipe.runnable import FullPipeline
 
-source = RandomSource()
-sink = Printer()
+extractor = Random() + Print()
 
-pipeline = Pipeline(source, sink)
+pipeline = FullPipeline(extractor)
 
 pipeline.run()
