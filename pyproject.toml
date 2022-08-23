@@ -32,3 +32,4 @@ branch = "feat/semantic_versioning"
 upload_to_pypi = false
 upload_to_release = false
 build_command = "poetry build"
+commit_version_number = true
